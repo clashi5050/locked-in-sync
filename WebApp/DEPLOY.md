@@ -19,20 +19,26 @@ Your data is one JSON row in Table Storage. The dashboard talks to two endpoints
 ## One-time setup
 
 ### 1. Remote state backend
-Create a storage account + container to hold Terraform state (do this once, any way you like):
+This repo can't use its own Terraform backend to create the storage account that backend
+lives in, so there's a separate one-time bootstrap module with local state:
 ```bash
-az group create -n rg-tfstate -l eastus2
-az storage account create -n <yourtfstatesa> -g rg-tfstate -l eastus2 --sku Standard_LRS
-az storage container create -n tfstate --account-name <yourtfstatesa>
+cd bootstrap
+terraform init
+terraform apply
 ```
-Then copy `backend.hcl.example` to `backend.hcl` and fill in the account name (for local
-`terraform` runs only — CI generates its own `backend.hcl` from the `TFSTATE_SA` variable below).
+Note the `tfstate_storage_account_name` output — that's the value you'll put in the
+`TFSTATE_SA` GitHub variable in step 3. Then, for local `terraform` runs against the main
+config (CI generates its own `backend.hcl` from `TFSTATE_SA`), copy `backend.hcl.example`
+to `backend.hcl` and fill in that same account name.
 
-### 2. App registration for OIDC (same idea as your resource-group workflow)
+### 2. App registration for OIDC
 Create an Azure AD app + service principal, grant it **Contributor** on the subscription
-(or target RG) **and** access to the tfstate storage, then add a **federated credential** so
-GitHub can log in with no secret. The federated credential subject must match the job's
-environment, e.g.:
+(or target RG) **and Storage Blob Data Contributor** on the tfstate storage account from
+step 1 (the backend uses Azure AD auth, not storage keys). Then add a **federated
+credential** so GitHub can log in with no secret:
+- **Entity type**: Environment (not Branch) — the workflow's jobs each set `environment: dev`,
+  so GitHub's OIDC token subject is environment-scoped regardless of which branch ran it.
+- **Subject identifier** (auto-generated once you pick Environment + `dev`):
 ```
 repo:<OWNER>/<REPO>:environment:dev
 ```
