@@ -2,7 +2,7 @@ name: Deploy Lock In
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch: {}
 
 permissions:
