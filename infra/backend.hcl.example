@@ -1,0 +1,7 @@
+# Remote-state backend config. Pass with: terraform init -backend-config=backend.hcl
+# Create these once (a dedicated tfstate storage account + container) before first init.
+
+resource_group_name  = "rg-tfstate"
+storage_account_name = "REPLACE_WITH_YOUR_TFSTATE_SA"
+container_name       = "tfstate"
+key                  = "lockin/dev.terraform.tfstate"

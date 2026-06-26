@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars for local runs, or rely on the workflow's -var flags in CI.
+# Do NOT put app_shared_secret here if this file will be committed.
+
+environment  = "dev"
+short_loc    = "use2"
+location     = "eastus2"
+swa_location = "eastus2"
+app          = "lockin"
+
+# app_shared_secret = "set-via-TF_VAR_app_shared_secret-instead"

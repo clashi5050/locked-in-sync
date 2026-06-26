@@ -1,0 +1,10 @@
+{
+  "environment": "dev",
+  "short_loc": "use2",
+  "location": "eastus2",
+  "swa_location": "eastus2",
+  "app": "lockin",
+  "app_shared_secret": "REPLACE_WITH_A_LONG_RANDOM_SECRET",
+  "SkuTier": "Free",
+  "SkuSize": "F1",
+}

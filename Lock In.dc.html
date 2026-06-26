@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#0e1217;color:#e8edf4;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:#b6ff3d;color:#0e1217}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,92,92,0)}50%{box-shadow:0 0 0 5px rgba(255,92,92,.16)}}
+  @keyframes pop{0%{transform:scale(.94);opacity:0}100%{transform:scale(1);opacity:1}}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#2a333f;border-radius:9px}
+  input::placeholder{color:#5d6a7b}
+</style>
+</helmet>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0e1217"/>
+    <rect x="30" y="42" width="40" height="30" rx="5" fill="none" stroke="#b6ff3d" stroke-width="3.5"/>
+    <path d="M38 42 v-8 a12 12 0 0 1 24 0 v8" fill="none" stroke="#b6ff3d" stroke-width="3.5"/>
+    <circle cx="50" cy="55" r="4" fill="#b6ff3d"/>
+    <rect x="48.5" y="57" width="3" height="8" fill="#b6ff3d"/>
+  </svg>
+</template>
+<div style="min-height:100vh;padding:24px 16px 56px;background:radial-gradient(1200px 600px at 50% -10%, #141b24 0%, #0e1217 55%)">
+<div style="max-width:1080px;margin:0 auto">
+
+  <sc-if value="{{ celebrateActive }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:pop .25s ease;background:linear-gradient(90deg,#1c2a10,#162033);border:1px solid #b6ff3d;border-radius:16px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;gap:16px;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#b6ff3d;background:#0e1217;border:1px solid #3a5418;border-radius:8px;padding:8px 12px">NICE</div>
+        <div>
+          <div style="font-size:18px;font-weight:700">{{ celebrateTitle }}</div>
+          <div style="font-size:13px;color:#9fb0c2">{{ celebrateSub }}</div>
+        </div>
+      </div>
+      <button onClick="{{ onDismissCelebrate }}" style="background:#b6ff3d;color:#0e1217;border:none;border-radius:9px;padding:10px 16px;font-family:inherit;font-weight:700;cursor:pointer">Keep going</button>
+    </div>
+  </sc-if>
+
+  <!-- HEADER -->
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:#6f7d8e;margin-bottom:6px">// PERSONAL OPS DASHBOARD</div>
+      <div style="font-size:40px;font-weight:700;letter-spacing:-1px;line-height:1">LOCK&nbsp;IN<span style="color:#b6ff3d">.</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+      <button onClick="{{ toggleSync }}" style="{{ syncPillStyle }}">{{ syncPillText }}</button>
+      <div style="text-align:right">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#6f7d8e;margin-bottom:4px">FOR</div>
+        <div style="font-size:15px;font-weight:600;color:#cdd8e4">{{ whyText }}</div>
+        <div style="font-size:12px;color:#6f7d8e;margin-top:2px">{{ whySub }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOUD SYNC PANEL -->
+  <sc-if value="{{ syncOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#161c25;border:1px solid #2e3947;border-radius:14px;padding:18px 20px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:16px;font-weight:700">Cloud sync</span>
+        <span style="{{ syncStatusStyle }}">{{ syncStatusText }}</span>
+      </div>
+      <div style="font-size:13px;color:#8a97a8;margin-bottom:14px">Point this at your Azure Function URL and enter your app secret. Stored only in this browser — set the same two values on any device to share one record.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input value="{{ draftBase }}" onChange="{{ onBaseInput }}" placeholder="https://func-lockin-dev-xxxxx.azurewebsites.net" style="background:#0e1217;border:1px solid #2e3947;color:#e8edf4;padding:11px 13px;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:13px">
+        <input value="{{ draftSecret }}" onChange="{{ onSecretInput }}" type="password" placeholder="App secret (APP_SHARED_SECRET)" style="background:#0e1217;border:1px solid #2e3947;color:#e8edf4;padding:11px 13px;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:13px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onClick="{{ saveSync }}" style="background:#b6ff3d;color:#0e1217;border:none;border-radius:10px;padding:10px 16px;font-family:inherit;font-weight:700;cursor:pointer">Save &amp; sync</button>
+          <button onClick="{{ pullSync }}" style="background:#1e2632;color:#e8edf4;border:1px solid #2e3947;border-radius:10px;padding:10px 16px;font-family:inherit;font-weight:600;cursor:pointer">Pull from cloud</button>
+          <button onClick="{{ pushSync }}" style="background:#1e2632;color:#e8edf4;border:1px solid #2e3947;border-radius:10px;padding:10px 16px;font-family:inherit;font-weight:600;cursor:pointer">Push to cloud</button>
+          <button onClick="{{ disconnectSync }}" style="background:transparent;color:#ff8c8c;border:1px solid #5a2a2a;border-radius:10px;padding:10px 16px;font-family:inherit;font-weight:600;cursor:pointer">Disconnect</button>
+        </div>
+        <div style="font-size:12px;color:#6f7d8e;min-height:16px">{{ syncMsg }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- HUD STATS -->
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <!-- level + xp -->
+    <div style="flex:1 1 320px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:18px 20px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:52px;height:52px;flex:none;border-radius:13px;background:linear-gradient(135deg,#2a2350,#3a2f6b);border:1px solid #564a8f;display:flex;align-items:center;justify-content:center">
+          <span style="font-size:22px;font-weight:700;color:#cabfff">{{ level }}</span>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8">LEVEL {{ level }}</div>
+          <div style="font-size:20px;font-weight:700;line-height:1.1">{{ levelTitle }}</div>
+        </div>
+      </div>
+      <div style="height:9px;background:#0e1217;border-radius:9px;overflow:hidden;border:1px solid #232c38">
+        <div style="height:100%;border-radius:inherit;background:#b69dff;width: {{ xpPct }}%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8a97a8">
+        <span>{{ xpNextLabel }}</span><span>{{ totalXp }} XP TOTAL</span>
+      </div>
+    </div>
+
+    <!-- streak -->
+    <div style="flex:1 1 200px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="width:9px;height:9px;border-radius:9px;background:#ffae42;animation:pulse 1.6s infinite;display:inline-block"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8">STREAK</span>
+      </div>
+      <div style="font-size:40px;font-weight:700;line-height:1;color:#ffae42">{{ streak }}<span style="font-size:15px;color:#8a97a8;font-weight:500"> days</span></div>
+      <div style="font-size:12px;color:#6f7d8e;margin-top:6px">Best: {{ longestStreak }} days</div>
+      <sc-if value="{{ streakAtRisk }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:#ff8c42;margin-top:6px">⚠ NOT LOCKED IN TODAY</div>
+      </sc-if>
+    </div>
+
+    <!-- momentum -->
+    <div style="flex:1 1 240px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8">MOMENTUM</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#cdd8e4">{{ momentumLabel }}</span>
+      </div>
+      <div style="height:14px;background:#0e1217;border-radius:9px;overflow:hidden;border:1px solid #232c38">
+        <div style="{{ momentumFillStyle }}"></div>
+      </div>
+      <div style="font-size:12px;color:#6f7d8e;margin-top:8px">Coasting drops this every quiet day. Keep it lit.</div>
+    </div>
+  </div>
+
+  <!-- COAST WARNING -->
+  <sc-if value="{{ coasting }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:glow 2s infinite;background:#1f1416;border:1px solid #ff5c5c;border-radius:14px;padding:16px 20px;margin-bottom:18px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#ff5c5c;margin-bottom:4px">⚠ YOU'RE COASTING</div>
+      <div style="font-size:15px;color:#f0c9c9">This is the exact pattern: comfortable → chill → days of nothing. Do one small thing right now and break it.</div>
+    </div>
+  </sc-if>
+
+  <!-- NEXT ACTION -->
+  <div style="background:linear-gradient(90deg,#11331a,#13202a);border:1px solid #2f5a33;border-radius:14px;padding:18px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#b6ff3d;flex:none">NEXT&nbsp;→</div>
+    <div style="font-size:17px;font-weight:600;flex:1;min-width:200px">{{ nextActionText }}</div>
+    <button onClick="{{ doCheckIn }}" style="{{ bigCheckInStyle }}">{{ checkInLabel }}</button>
+  </div>
+
+  <!-- 90-DAY PLAN -->
+  <div style="background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+      <span style="font-size:18px;font-weight:700">90-Day Plan to Senior</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b6ff3d">{{ planLabel }} milestones</span>
+    </div>
+    <div style="font-size:13px;color:#8a97a8;margin-bottom:18px">Evidence beats competency. Find a scoped win, ship it, make it visible. ~3–5 hrs/week is enough — if you keep the streak.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px">
+      <sc-for list="{{ plan }}" as="phase" hint-placeholder-count="3">
+        <div style="{{ phase.cardStyle }}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            <span style="font-size:15px;font-weight:700;line-height:1.2">{{ phase.title }}</span>
+            <sc-if value="{{ phase.isActive }}" hint-placeholder-val="{{ false }}">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:#0e1217;background:#b6ff3d;border-radius:5px;padding:2px 7px;flex:none">NOW</span>
+            </sc-if>
+          </div>
+          <div style="font-size:12px;color:#8a97a8;margin-bottom:12px">{{ phase.sub }}</div>
+          <div style="height:7px;background:#0e1217;border-radius:9px;overflow:hidden;border:1px solid #232c38;margin-bottom:14px">
+            <div style="height:100%;border-radius:inherit;background:#b6ff3d;width: {{ phase.pct }}%"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ phase.tasks }}" as="task" hint-placeholder-count="5">
+              <div onClick="{{ task.onToggle }}" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                <span style="{{ task.boxStyle }}">{{ task.mark }}</span>
+                <span style="{{ task.labelStyle }}">{{ task.name }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+
+    <!-- TODAY -->
+    <div style="flex:1 1 340px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="font-size:18px;font-weight:700">Today</span>
+        <button onClick="{{ doCheckIn }}" style="{{ checkInBtnStyle }}">{{ checkInLabel }}</button>
+      </div>
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8;margin-bottom:10px">THE ONE THING</div>
+
+      <sc-if value="{{ oneThingEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:8px">
+          <input value="{{ draftOneThing }}" onChange="{{ onOneThingInput }}" onKeyDown="{{ onOneThingKey }}" placeholder="e.g. 1 hr on GitHub Actions workflows" style="flex:1;background:#0e1217;border:1px solid #2e3947;color:#e8edf4;padding:11px 13px;border-radius:10px;font-family:inherit;font-size:14px">
+          <button onClick="{{ setOneThing }}" style="background:#1e2632;color:#e8edf4;border:1px solid #2e3947;border-radius:10px;padding:0 16px;font-family:inherit;font-weight:600;cursor:pointer">Set</button>
+        </div>
+        <div style="font-size:13px;color:#6f7d8e;margin-top:10px">Pick ONE concrete thing. Not five. One.</div>
+      </sc-if>
+
+      <sc-if value="{{ oneThingPending }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#0e1217;border:1px solid #2e3947;border-radius:12px;padding:16px">
+          <div style="font-size:17px;font-weight:600;margin-bottom:12px">{{ oneThingText }}</div>
+          <button onClick="{{ completeOneThing }}" style="background:#b6ff3d;color:#0e1217;border:none;border-radius:10px;padding:11px 18px;font-family:inherit;font-weight:700;cursor:pointer">Mark done&nbsp;&nbsp;+10 XP</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ oneThingDoneState }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#11240f;border:1px solid #3a5418;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:26px;border-radius:8px;background:#b6ff3d;color:#0e1217;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">✓</span>
+          <div>
+            <div style="font-size:15px;font-weight:600;color:#cfe6a8;text-decoration:line-through">{{ oneThingText }}</div>
+            <div style="font-size:12px;color:#7f8f6a">Done. That's how the streak survives.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="height:1px;background:#232c38;margin:18px 0"></div>
+      <button onClick="{{ logStudy }}" style="width:100%;background:#1e2632;color:#e8edf4;border:1px solid #2e3947;border-radius:10px;padding:12px;font-family:inherit;font-weight:600;cursor:pointer">+ Log a study session&nbsp;&nbsp;<span style="color:#b69dff">+15 XP</span></button>
+    </div>
+
+    <!-- CERT -->
+    <div style="flex:1 1 340px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8;margin-bottom:6px">ACTIVE CERT</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px">
+        <span style="font-size:19px;font-weight:700;line-height:1.15">{{ activeCertName }}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#b6ff3d;flex:none">{{ certDoneLabel }}</span>
+      </div>
+      <div style="height:10px;background:#0e1217;border-radius:9px;overflow:hidden;border:1px solid #232c38;margin-bottom:18px">
+        <div style="height:100%;border-radius:inherit;background:#b6ff3d;width: {{ certPct }}%"></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ activeCertModules }}" as="module" hint-placeholder-count="5">
+          <div onClick="{{ module.onToggle }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:6px 4px;border-radius:8px">
+            <span style="{{ module.boxStyle }}">{{ module.mark }}</span>
+            <span style="{{ module.labelStyle }}">{{ module.name }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="height:1px;background:#232c38;margin:18px 0 14px"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8;margin-bottom:10px">UP NEXT — switch anytime</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ otherCerts }}" as="c" hint-placeholder-count="3">
+          <div onClick="{{ c.onActivate }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0e1217;border:1px solid #2a333f;border-radius:10px;padding:11px 13px;cursor:pointer">
+            <span style="font-size:14px;color:#cdd8e4">{{ c.name }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6f7d8e;flex:none">{{ c.sub }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- RECEIPTS / WINS -->
+    <div style="flex:1 1 340px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span style="font-size:18px;font-weight:700">The Receipts</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b6ff3d">{{ winsCount }} logged</span>
+      </div>
+      <div style="font-size:13px;color:#8a97a8;margin-bottom:14px">Concrete automation wins your manager can point to. This is what gets you promoted — not certs.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input value="{{ draftWin }}" onChange="{{ onWinInput }}" onKeyDown="{{ onWinKey }}" placeholder="e.g. Terraform module that cut env spin-up to 5 min" style="flex:1;background:#0e1217;border:1px solid #2e3947;color:#e8edf4;padding:11px 13px;border-radius:10px;font-family:inherit;font-size:14px">
+        <button onClick="{{ addWin }}" style="background:#b6ff3d;color:#0e1217;border:none;border-radius:10px;padding:0 16px;font-family:inherit;font-weight:700;cursor:pointer;flex:none">+50</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;max-height:280px;overflow-y:auto">
+        <sc-if value="{{ winsEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px;color:#6f7d8e;padding:8px 0;font-style:italic">No receipts yet. Your quiet weeks are the perfect time to build one.</div>
+        </sc-if>
+        <sc-for list="{{ wins }}" as="w" hint-placeholder-count="2">
+          <div style="background:#0e1217;border:1px solid #2a333f;border-left:3px solid #b6ff3d;border-radius:10px;padding:11px 13px">
+            <div style="font-size:14px;color:#e8edf4;line-height:1.35">{{ w.text }}</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6f7d8e;margin-top:4px">{{ w.date }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- VISIBILITY -->
+    <div style="flex:1 1 340px;background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span style="font-size:18px;font-weight:700">Visibility</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b69dff">{{ visCount }} logged</span>
+      </div>
+      <div style="font-size:13px;color:#8a97a8;margin-bottom:14px">Demos, manager updates, things you spoke up on. Invisible work gets cut in reorgs. Be seen.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input value="{{ draftVis }}" onChange="{{ onVisInput }}" onKeyDown="{{ onVisKey }}" placeholder="e.g. Demoed the pipeline fix to new CloudOps lead" style="flex:1;background:#0e1217;border:1px solid #2e3947;color:#e8edf4;padding:11px 13px;border-radius:10px;font-family:inherit;font-size:14px">
+        <button onClick="{{ addVis }}" style="background:#b69dff;color:#0e1217;border:none;border-radius:10px;padding:0 16px;font-family:inherit;font-weight:700;cursor:pointer;flex:none">+30</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;max-height:280px;overflow-y:auto">
+        <sc-if value="{{ visEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px;color:#6f7d8e;padding:8px 0;font-style:italic">Your new manager barely knows you yet. Change that this week.</div>
+        </sc-if>
+        <sc-for list="{{ visibility }}" as="v" hint-placeholder-count="2">
+          <div style="background:#0e1217;border:1px solid #2a333f;border-left:3px solid #b69dff;border-radius:10px;padding:11px 13px">
+            <div style="font-size:14px;color:#e8edf4;line-height:1.35">{{ v.text }}</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6f7d8e;margin-top:4px">{{ v.date }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG -->
+  <div style="background:#161c25;border:1px solid #232c38;border-radius:16px;padding:22px;margin-top:14px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a97a8;margin-bottom:14px">ACTIVITY LOG</div>
+    <sc-if value="{{ logEmpty }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:13px;color:#6f7d8e;font-style:italic">Nothing yet. Hit "Lock in today" to start the record.</div>
+    </sc-if>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ log }}" as="l" hint-placeholder-count="0">
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1c232d">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6f7d8e;width:54px;flex:none">{{ l.date }}</span>
+          <span style="font-size:14px;color:#cdd8e4;flex:1">{{ l.text }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b6ff3d;flex:none">{{ l.xp }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:13px;color:#5d6a7b;margin-top:26px;line-height:1.6">
+    Comfort is the enemy. The streak only counts if you keep showing up.<br>
+    <span style="color:#46525f">Saved on this device · {{ momentumLabel }} · Level {{ level }} {{ levelTitle }}</span>
+  </div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1100, &quot;height&quot;: 1500 },
+  &quot;decayMode&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Gentle&quot;, &quot;Standard&quot;, &quot;Brutal&quot;], &quot;default&quot;: &quot;Standard&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;graceDays&quot;: { &quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 1, &quot;min&quot;: 0, &quot;max&quot;: 2, &quot;tsType&quot;: &quot;number&quot; }
+}">
+class Component extends DCLogic {
+  state = {
+    data: this.load(),
+    drafts: { win: '', vis: '', oneThing: '' },
+    celebrate: null,
+    sync: {
+      open: false,
+      status: (localStorage.getItem('lockin_api_base') && localStorage.getItem('lockin_secret')) ? 'syncing' : 'local',
+      msg: '',
+      draftBase: localStorage.getItem('lockin_api_base') || '',
+      draftSecret: localStorage.getItem('lockin_secret') || ''
+    }
+  };
+
+  // ---------- date helpers ----------
+  todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  parse(s) { const p = (s || this.todayStr()).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]).getTime(); }
+  daysBetween(a, b) { return Math.round((this.parse(b) - this.parse(a)) / 86400000); }
+  fmt(s) {
+    const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const p = (s || '').split('-').map(Number); if (p.length < 3) return s;
+    return m[p[1] - 1] + ' ' + p[2];
+  }
+
+  // ---------- config (props) ----------
+  decay() { return ({ Gentle: 10, Standard: 16, Brutal: 28 })[this.props.decayMode] || 16; }
+  grace() { const g = this.props.graceDays; return (g === 0 || g) ? g : 1; }
+  levels() { return ['Cold Start','Booting Up','Operator','Automator','Pipeline Builder','SRE','Tech Lead','Architect','Indispensable']; }
+
+  levelInfo(xp) {
+    const L = this.levels(); let lvl = 1, rem = xp || 0, need = 150;
+    while (rem >= need && lvl < L.length) { rem -= need; lvl++; need = 150 + (lvl - 1) * 100; }
+    const max = lvl >= L.length;
+    return { level: lvl, title: L[lvl - 1], xpInLevel: rem, xpForNext: need, pct: max ? 100 : Math.round(rem / need * 100), max };
+  }
+  momColor(m) { return m >= 66 ? '#b6ff3d' : m >= 40 ? '#ffae42' : '#ff5c5c'; }
+  momLabel(m) { return m >= 66 ? 'LOCKED IN' : m >= 40 ? 'STEADY' : 'COASTING'; }
+
+  // ---------- persistence ----------
+  seed() {
+    const mk = (id, name, mods, active) => ({ id, name, active: !!active, complete: false, modules: mods.map(n => ({ name: n, done: false })) });
+    return {
+      totalXp: 0, streak: 0, longestStreak: 0, lastCheckIn: null,
+      momentum: 100, lastActiveDate: this.todayStr(),
+      oneThing: '', oneThingDone: false, oneThingDate: null,
+      certs: [
+        mk('gha', 'GitHub Actions Certification', ['Author & maintain workflows','Consume workflows & actions','Author & maintain custom actions','Manage Actions across the enterprise','Take a practice exam','Schedule & pass the exam'], true),
+        mk('found', 'GitHub Foundations', ['Git & GitHub fundamentals','Collaboration: PRs, issues, projects','Repo management & security basics','Pass the exam'], false),
+        mk('tf', 'HashiCorp Terraform Associate', ['Core workflow & state','Modules & providers','Functions & expressions','Terraform Cloud basics','Pass the exam'], false),
+        mk('az305', 'Azure Solutions Architect (AZ-305)', ['Design identity & governance','Design data storage','Design business continuity','Design infrastructure','Pass the exam'], false)
+      ],
+      wins: [], visibility: [], log: [], plan: this.seedPlan()
+    };
+  }
+
+  seedPlan() {
+    const ph = (id, title, sub, tasks) => ({ id, title, sub, bonus: false, tasks: tasks.map(n => ({ name: n, done: false })) });
+    return [
+      ph('p1', 'Phase 1 — Hunt & Anchor', 'Days 1–30 · Get the rubric, find the gap', [
+        'Land on CloudOps team & lock a recurring 1:1',
+        'Ask: "What does senior look like here, written down?"',
+        'Pick ONE arena — reliability, cost, DX, or security',
+        'Find a real gap in it with a number attached',
+        'Log it as Receipt #1 (the problem, not the fix yet)'
+      ]),
+      ph('p2', 'Phase 2 — Build & Ship', 'Days 31–60 · One scoped win others depend on', [
+        'Scope the fix small enough to ship in ~3 weeks',
+        'Build it in Terraform / Actions — make it reusable',
+        'Ship it; capture the before/after numbers',
+        'Write a short doc so the team can actually use it',
+        'Log the shipped win to Receipts'
+      ]),
+      ph('p3', 'Phase 3 — Make It Count', 'Days 61–90 · Visibility + the credential', [
+        'Demo the win to your manager in a 1:1',
+        'Share it wider — team channel / short writeup',
+        'Pass the GitHub Actions exam',
+        'Map your wins to the senior rubric, line by line',
+        'Have the explicit "path to senior" conversation'
+      ])
+    ];
+  }
+
+  applyDecay(d) {
+    if (!d || !d.certs) d = this.seed();
+    if (!d.plan) d.plan = this.seedPlan();
+    const today = this.todayStr();
+    if (d.lastActiveDate) {
+      const gap = this.daysBetween(d.lastActiveDate, today);
+      if (gap > 0) { d.momentum = Math.max(0, Math.round((d.momentum || 0) - gap * this.decay())); d.lastActiveDate = today; }
+    } else d.lastActiveDate = today;
+    if (d.oneThingDate !== today) d.oneThingDone = false;
+    if (!d.updatedAt) d.updatedAt = Date.now();
+    return d;
+  }
+
+  load() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem('lockin_v1')); } catch (e) {}
+    d = this.applyDecay(d || this.seed());
+    try { localStorage.setItem('lockin_v1', JSON.stringify(d)); } catch (e) {}
+    return d;
+  }
+
+  // ---------- cloud sync (Azure Function + Table Storage) ----------
+  componentDidMount() { this.maybePull(); }
+
+  syncCfg() {
+    return {
+      base: (localStorage.getItem('lockin_api_base') || '').trim(),
+      secret: (localStorage.getItem('lockin_secret') || '').trim()
+    };
+  }
+  apiUrl(cfg, path) { return cfg.base.replace(/\/+$/, '') + '/api/' + path; }
+  setSync(patch) { this.setState(s => ({ sync: Object.assign({}, s.sync, patch) })); }
+
+  async maybePull() {
+    const cfg = this.syncCfg();
+    if (!cfg.base || !cfg.secret) { this.setSync({ status: 'local' }); return; }
+    this.setSync({ status: 'syncing', msg: 'Connecting…' });
+    try {
+      const r = await fetch(this.apiUrl(cfg, 'state'), { headers: { 'x-app-secret': cfg.secret } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if (j && j.data) {
+        const remote = j.data;
+        const localUpdated = this.state.data.updatedAt || 0;
+        if ((remote.updatedAt || 0) >= localUpdated) {
+          const adopted = this.applyDecay(remote);
+          try { localStorage.setItem('lockin_v1', JSON.stringify(adopted)); } catch (e) {}
+          this.setState({ data: adopted });
+          this.setSync({ status: 'synced', msg: 'Pulled latest from cloud' });
+        } else {
+          this.setSync({ status: 'synced', msg: 'Local is newer — pushing up' });
+          this.pushNow();
+        }
+      } else {
+        this.pushNow(); // nothing in the cloud yet — seed it with local
+      }
+    } catch (e) {
+      this.setSync({ status: 'error', msg: 'Pull failed: ' + e.message });
+    }
+  }
+
+  async pushNow() {
+    const cfg = this.syncCfg();
+    if (!cfg.base || !cfg.secret) return;
+    this.setSync({ status: 'syncing', msg: 'Saving…' });
+    try {
+      const payload = { data: this.state.data, updatedAt: this.state.data.updatedAt || Date.now() };
+      const r = await fetch(this.apiUrl(cfg, 'state'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-app-secret': cfg.secret },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      this.setSync({ status: 'synced', msg: 'Saved to cloud' });
+    } catch (e) {
+      this.setSync({ status: 'error', msg: 'Save failed: ' + e.message });
+    }
+  }
+
+  schedulePush() {
+    const cfg = this.syncCfg();
+    if (!cfg.base || !cfg.secret) return;
+    clearTimeout(this._pushTimer);
+    this._pushTimer = setTimeout(() => this.pushNow(), 1200);
+  }
+
+  toggleSync = () => this.setSync({ open: !this.state.sync.open });
+  onBaseInput = e => this.setSync({ draftBase: e.target.value });
+  onSecretInput = e => this.setSync({ draftSecret: e.target.value });
+  saveSync = () => {
+    try {
+      localStorage.setItem('lockin_api_base', (this.state.sync.draftBase || '').trim());
+      localStorage.setItem('lockin_secret', (this.state.sync.draftSecret || '').trim());
+    } catch (e) {}
+    this.maybePull();
+  };
+  pullSync = () => this.maybePull();
+  pushSync = () => this.update(() => {}); // re-stamps updatedAt + schedules a push
+  disconnectSync = () => {
+    try { localStorage.removeItem('lockin_api_base'); localStorage.removeItem('lockin_secret'); } catch (e) {}
+    this.setSync({ status: 'local', msg: 'Disconnected — local only', draftBase: '', draftSecret: '' });
+  };
+
+  syncVals() {
+    const sy = this.state.sync;
+    const colors = { local: '#6f7d8e', syncing: '#ffae42', synced: '#b6ff3d', error: '#ff5c5c' };
+    const labels = { local: 'LOCAL ONLY', syncing: 'SYNCING…', synced: 'SYNCED', error: 'SYNC ERROR' };
+    const c = colors[sy.status] || '#6f7d8e';
+    return {
+      syncOpen: sy.open,
+      toggleSync: this.toggleSync,
+      syncPillText: '☁ ' + (labels[sy.status] || 'LOCAL ONLY'),
+      syncPillStyle: { display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'JetBrains Mono',monospace", fontSize: '11px', letterSpacing: '1px', color: c, background: '#161c25', border: '1px solid ' + c + '66', borderRadius: '8px', padding: '7px 11px', cursor: 'pointer' },
+      syncStatusText: labels[sy.status] || 'LOCAL ONLY',
+      syncStatusStyle: { fontFamily: "'JetBrains Mono',monospace", fontSize: '11px', letterSpacing: '1px', color: c },
+      syncMsg: sy.msg || '',
+      draftBase: sy.draftBase || '',
+      draftSecret: sy.draftSecret || '',
+      onBaseInput: this.onBaseInput,
+      onSecretInput: this.onSecretInput,
+      saveSync: this.saveSync,
+      pullSync: this.pullSync,
+      pushSync: this.pushSync,
+      disconnectSync: this.disconnectSync
+    };
+  }
+
+  update(fn) {
+    const prev = this.state.data;
+    const prevLevel = this.levelInfo(prev.totalXp).level;
+    const d = JSON.parse(JSON.stringify(prev));
+    fn(d);
+    d.updatedAt = Date.now();
+    if (d.log) d.log = d.log.slice(0, 40);
+    try { localStorage.setItem('lockin_v1', JSON.stringify(d)); } catch (e) {}
+    const newLevel = this.levelInfo(d.totalXp).level;
+    const patch = { data: d };
+    if (newLevel > prevLevel) patch.celebrate = { title: 'Level ' + newLevel + ' — ' + this.levels()[newLevel - 1], sub: 'You leveled up. Momentum compounds. Keep it lit.' };
+    this.setState(patch);
+    this.schedulePush();
+  }
+
+  logRow(d, text, xp) { d.log.unshift({ date: this.fmt(this.todayStr()), text, xp: xp > 0 ? '+' + xp : '' }); }
+  reward(d, xp, mom) { d.totalXp += xp; d.momentum = Math.min(100, (d.momentum || 0) + mom); d.lastActiveDate = this.todayStr(); }
+
+  // ---------- actions ----------
+  doCheckIn = () => {
+    const today = this.todayStr();
+    if (this.state.data.lastCheckIn === today) return;
+    this.update(d => {
+      const gap = d.lastCheckIn ? this.daysBetween(d.lastCheckIn, today) : 999;
+      if (d.lastCheckIn && gap <= this.grace() + 1) d.streak = (d.streak || 0) + 1; else d.streak = 1;
+      d.longestStreak = Math.max(d.longestStreak || 0, d.streak);
+      d.lastCheckIn = today;
+      this.reward(d, 10, 20);
+      this.logRow(d, 'Locked in for the day', 10);
+    });
+  };
+
+  setDraft(k, v) { this.setState(s => ({ drafts: Object.assign({}, s.drafts, { [k]: v }) })); }
+
+  setOneThing = () => {
+    const t = (this.state.drafts.oneThing || '').trim(); if (!t) return;
+    this.update(d => { d.oneThing = t; d.oneThingDate = this.todayStr(); d.oneThingDone = false; });
+    this.setDraft('oneThing', '');
+  };
+  completeOneThing = () => {
+    const d0 = this.state.data; if (!d0.oneThing || d0.oneThingDone) return;
+    this.update(d => { d.oneThingDone = true; d.oneThingDate = this.todayStr(); this.reward(d, 10, 10); this.logRow(d, 'Did the one thing: ' + d.oneThing, 10); });
+  };
+  logStudy = () => { this.update(d => { this.reward(d, 15, 12); this.logRow(d, 'Study session', 15); }); };
+
+  addWin = () => {
+    const t = (this.state.drafts.win || '').trim(); if (!t) return;
+    this.update(d => { d.wins.unshift({ date: this.fmt(this.todayStr()), text: t }); this.reward(d, 50, 15); this.logRow(d, 'Receipt logged: ' + t, 50); });
+    this.setDraft('win', '');
+  };
+  addVis = () => {
+    const t = (this.state.drafts.vis || '').trim(); if (!t) return;
+    this.update(d => { d.visibility.unshift({ date: this.fmt(this.todayStr()), text: t }); this.reward(d, 30, 12); this.logRow(d, 'Visibility: ' + t, 30); });
+    this.setDraft('vis', '');
+  };
+
+  toggleModule(certId, idx) {
+    this.update(d => {
+      const cert = d.certs.find(c => c.id === certId); if (!cert) return;
+      const m = cert.modules[idx]; m.done = !m.done;
+      if (m.done) { this.reward(d, 20, 10); this.logRow(d, 'Studied: ' + m.name, 20); }
+      const allDone = cert.modules.every(x => x.done);
+      if (allDone && !cert.complete) {
+        cert.complete = true; this.reward(d, 100, 25); this.logRow(d, 'CERT COMPLETE: ' + cert.name, 100);
+        this._certDone = cert.name;
+      }
+    });
+    if (this._certDone) { const n = this._certDone; this._certDone = null; this.setState({ celebrate: { title: n + ' — DONE', sub: 'That is a real, promotable win. Log the receipt and tell your manager.' } }); }
+  }
+  activateCert(id) { this.update(d => { d.certs.forEach(c => c.active = c.id === id); }); }
+
+  togglePhaseTask(phaseId, idx) {
+    this.update(d => {
+      const ph = d.plan.find(p => p.id === phaseId); if (!ph) return;
+      const t = ph.tasks[idx]; t.done = !t.done;
+      if (t.done) { this.reward(d, 25, 10); this.logRow(d, 'Plan: ' + t.name, 25); }
+      if (ph.tasks.every(x => x.done) && !ph.bonus) { ph.bonus = true; this.reward(d, 75, 15); this.logRow(d, 'PHASE COMPLETE: ' + ph.title, 75); this._phaseDone = ph.title; }
+      if (!ph.tasks.every(x => x.done)) ph.bonus = false;
+    });
+    if (this._phaseDone) { const n = this._phaseDone; this._phaseDone = null; this.setState({ celebrate: { title: n + ' — COMPLETE', sub: 'A third of the way to senior. This is what evidence looks like.' } }); }
+  }
+
+  onDismissCelebrate = () => this.setState({ celebrate: null });
+
+  // ---------- render ----------
+  renderVals() {
+    const d = this.state.data, dr = this.state.drafts, today = this.todayStr();
+    const li = this.levelInfo(d.totalXp);
+    const checkedIn = d.lastCheckIn === today;
+    const cert = d.certs.find(c => c.active) || d.certs[0];
+    const total = cert.modules.length, done = cert.modules.filter(m => m.done).length;
+    const certPct = Math.round(done / total * 100);
+    const planTasks = d.plan.reduce((a, p) => a + p.tasks.length, 0);
+    const planDoneN = d.plan.reduce((a, p) => a + p.tasks.filter(t => t.done).length, 0);
+    const activePhaseIdx = d.plan.findIndex(p => !p.tasks.every(t => t.done));
+    const boxSm = on => ({ width: '20px', height: '20px', borderRadius: '5px', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, marginTop: '1px', border: on ? '1px solid #b6ff3d' : '1px solid #3a4452', background: on ? '#b6ff3d' : 'transparent', color: '#0e1217' });
+    const planLab = on => ({ fontSize: '14px', lineHeight: '1.35', color: on ? '#6f7d8e' : '#cdd8e4', textDecoration: on ? 'line-through' : 'none' });
+
+    let nextActionText;
+    if (!checkedIn) nextActionText = 'Lock in for today — hit the check-in button.';
+    else if (!d.oneThing || d.oneThingDate !== today) nextActionText = 'Set your ONE thing for today.';
+    else if (!d.oneThingDone) nextActionText = 'Do your one thing: ' + d.oneThing;
+    else { const m = cert.modules.find(x => !x.done); nextActionText = m ? 'Study: ' + m.name : 'Log an automation win — build the receipts.'; }
+
+    const modBox = on => ({ width: '22px', height: '22px', borderRadius: '6px', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, border: on ? '1px solid #b6ff3d' : '1px solid #3a4452', background: on ? '#b6ff3d' : 'transparent', color: '#0e1217' });
+    const modLabel = on => ({ fontSize: '15px', color: on ? '#6f7d8e' : '#e8edf4', textDecoration: on ? 'line-through' : 'none' });
+
+    return {
+      ...this.syncVals(),
+      celebrateActive: !!this.state.celebrate,
+      celebrateTitle: this.state.celebrate ? this.state.celebrate.title : '',
+      celebrateSub: this.state.celebrate ? this.state.celebrate.sub : '',
+      onDismissCelebrate: this.onDismissCelebrate,
+
+      whyText: 'the money. my kids.',
+      whySub: 'proving it to myself — then helping others through theirs.',
+
+      level: li.level, levelTitle: li.title, xpPct: li.pct, totalXp: d.totalXp,
+      xpNextLabel: li.max ? 'MAX LEVEL' : (li.xpInLevel + ' / ' + li.xpForNext + ' to next'),
+
+      streak: d.streak || 0, longestStreak: d.longestStreak || 0,
+      streakAtRisk: !checkedIn && (d.streak || 0) > 0,
+
+      momentum: Math.round(d.momentum),
+      momentumLabel: this.momLabel(d.momentum),
+      momentumFillStyle: { height: '100%', borderRadius: 'inherit', width: Math.round(d.momentum) + '%', background: this.momColor(d.momentum), transition: 'width .4s ease' },
+      coasting: d.momentum < 40,
+
+      nextActionText,
+
+      checkedInToday: checkedIn,
+      checkInLabel: checkedIn ? '✓ Locked in today' : 'Lock in today  +10',
+      checkInBtnStyle: checkedIn
+        ? { background: '#11240f', color: '#9fc66b', border: '1px solid #3a5418', borderRadius: '10px', padding: '11px 16px', fontFamily: 'inherit', fontWeight: 700, cursor: 'default' }
+        : { background: '#b6ff3d', color: '#0e1217', border: 'none', borderRadius: '10px', padding: '11px 16px', fontFamily: 'inherit', fontWeight: 700, cursor: 'pointer' },
+      doCheckIn: checkedIn ? () => {} : this.doCheckIn,
+      bigCheckInStyle: checkedIn
+        ? { background: '#11240f', color: '#9fc66b', border: '1px solid #3a5418', borderRadius: '11px', padding: '14px 26px', fontFamily: 'inherit', fontSize: '16px', fontWeight: 700, cursor: 'default', flex: 'none' }
+        : { background: '#b6ff3d', color: '#0e1217', border: 'none', borderRadius: '11px', padding: '14px 28px', fontFamily: 'inherit', fontSize: '16px', fontWeight: 700, cursor: 'pointer', flex: 'none', boxShadow: '0 0 0 4px rgba(182,255,61,.14)' },
+
+      oneThingEmpty: !d.oneThing || d.oneThingDate !== today,
+      oneThingPending: !!d.oneThing && d.oneThingDate === today && !d.oneThingDone,
+      oneThingDoneState: !!d.oneThing && d.oneThingDate === today && d.oneThingDone,
+      oneThingText: d.oneThing,
+      draftOneThing: dr.oneThing,
+      onOneThingInput: e => this.setDraft('oneThing', e.target.value),
+      onOneThingKey: e => { if (e.key === 'Enter') this.setOneThing(); },
+      setOneThing: this.setOneThing,
+      completeOneThing: this.completeOneThing,
+      logStudy: this.logStudy,
+
+      activeCertName: cert.name,
+      certDoneLabel: done + ' / ' + total,
+      certPct,
+      activeCertModules: cert.modules.map((m, idx) => ({ name: m.name, mark: m.done ? '✓' : '', boxStyle: modBox(m.done), labelStyle: modLabel(m.done), onToggle: () => this.toggleModule(cert.id, idx) })),
+      otherCerts: d.certs.filter(c => !c.active).map(c => { const t = c.modules.length, dn = c.modules.filter(m => m.done).length; return { name: c.name, sub: c.complete ? 'done' : dn + '/' + t, onActivate: () => this.activateCert(c.id) }; }),
+
+      planLabel: planDoneN + ' / ' + planTasks,
+      plan: d.plan.map((p, pi) => { const t = p.tasks.length, dn = p.tasks.filter(x => x.done).length; const active = pi === activePhaseIdx; return {
+        title: p.title, sub: p.sub, pct: Math.round(dn / t * 100), isActive: active,
+        cardStyle: { flex: '1 1 280px', background: '#0e1217', border: active ? '1px solid #3a5418' : '1px solid #2a333f', borderRadius: '13px', padding: '18px' },
+        tasks: p.tasks.map((tk, ti) => ({ name: tk.name, mark: tk.done ? '✓' : '', boxStyle: boxSm(tk.done), labelStyle: planLab(tk.done), onToggle: () => this.togglePhaseTask(p.id, ti) }))
+      }; }),
+
+      winsCount: d.wins.length, winsEmpty: d.wins.length === 0, wins: d.wins,
+      draftWin: dr.win, onWinInput: e => this.setDraft('win', e.target.value), onWinKey: e => { if (e.key === 'Enter') this.addWin(); }, addWin: this.addWin,
+
+      visCount: d.visibility.length, visEmpty: d.visibility.length === 0, visibility: d.visibility,
+      draftVis: dr.vis, onVisInput: e => this.setDraft('vis', e.target.value), onVisKey: e => { if (e.key === 'Enter') this.addVis(); }, addVis: this.addVis,
+
+      log: d.log, logEmpty: d.log.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>
