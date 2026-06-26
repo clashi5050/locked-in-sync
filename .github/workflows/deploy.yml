@@ -1,9 +1,21 @@
 name: Deploy Lock In
 
 on:
-  push:
-    branches: [dev]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    # Input parameters the user fills out before running the workflow
+    inputs:
+      short_loc:
+        description: 'Short name for Azure Region'
+        required: true
+        default: 'use2'
+      environment:
+        description: 'Environment (sndx, dev, test, np, stg, uat, prod)'
+        required: true
+        default: 'dev'
+      destroy_after:
+        description: 'Do you want to destroy the resource after creation.(true/false)'
+        required: false
+        default: 'false'
 
 permissions:
   id-token: write
