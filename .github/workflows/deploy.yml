@@ -49,10 +49,13 @@ jobs:
       # backend.hcl isn't committed (it holds the tfstate storage account name);
       # generate it here from a repo/environment variable instead.
       - name: Write backend config
+        env:
+          TFSTATE_SA: ${{ vars.TFSTATE_SA }}
         run: |
+          SA=$(echo "$TFSTATE_SA" | xargs)
           cat > backend.hcl <<EOF
           resource_group_name  = "rg-tfstate"
-          storage_account_name = "${{ vars.TFSTATE_SA }}"
+          storage_account_name = "$SA"
           container_name       = "tfstate"
           key                  = "lockin/dev.terraform.tfstate"
           EOF
