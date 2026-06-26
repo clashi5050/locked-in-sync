@@ -30,7 +30,13 @@ jobs:
       function_app_name: ${{ steps.tf-outputs.outputs.function_app_name }}
       static_web_app_name: ${{ steps.tf-outputs.outputs.static_web_app_name }}
     env:
+      # The backend "azurerm" block authenticates separately from the
+      # provider block and can't see TF_VAR_* (backends can't reference
+      # input variables at all) — it needs these plain ARM_* names directly.
       ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       TF_VAR_arm_client_id: ${{ secrets.ARM_CLIENT_ID }}
       TF_VAR_arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       TF_VAR_arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}
