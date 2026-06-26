@@ -25,7 +25,8 @@ az group create -n rg-tfstate -l eastus2
 az storage account create -n <yourtfstatesa> -g rg-tfstate -l eastus2 --sku Standard_LRS
 az storage container create -n tfstate --account-name <yourtfstatesa>
 ```
-Then copy `infra/backend.hcl.example` to `infra/backend.hcl` and fill in the account name.
+Then copy `backend.hcl.example` to `backend.hcl` and fill in the account name (for local
+`terraform` runs only — CI generates its own `backend.hcl` from the `TFSTATE_SA` variable below).
 
 ### 2. App registration for OIDC (same idea as your resource-group workflow)
 Create an Azure AD app + service principal, grant it **Contributor** on the subscription
@@ -43,6 +44,8 @@ repo:<OWNER>/<REPO>:environment:dev
   - `ARM_SUBSCRIPTION_ID`
   - `ARM_TENANT_ID`
   - `APP_SHARED_SECRET`  ← invent a long random string; this is your app password.
+- Add a repo or environment **variable** (not secret):
+  - `TFSTATE_SA` ← the tfstate storage account name from step 1.
 
 ---
 

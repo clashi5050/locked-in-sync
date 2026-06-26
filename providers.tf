@@ -6,13 +6,11 @@ terraform {
     }
   }
 
+  # resource_group_name / storage_account_name / container_name / key are supplied
+  # at init time via `-backend-config=backend.hcl` (see backend.hcl.example).
   backend "azurerm" {
-    resource_group_name  = "tfstatelab"
-    storage_account_name = "tfstatestoragelab2"
-    container_name       = "tfstate"
-    key                  = "homelab.tfstate"
-    use_azuread_auth     = true
-    use_oidc             = true
+    use_azuread_auth = true
+    use_oidc         = true
   }
 }
 

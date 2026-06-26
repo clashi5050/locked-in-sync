@@ -1,0 +1,135 @@
+name: Deploy Lock In
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    outputs:
+      resource_group: ${{ steps.tf-outputs.outputs.resource_group }}
+      function_app_name: ${{ steps.tf-outputs.outputs.function_app_name }}
+      static_web_app_name: ${{ steps.tf-outputs.outputs.static_web_app_name }}
+    env:
+      ARM_USE_OIDC: "true"
+      TF_VAR_arm_client_id: ${{ secrets.ARM_CLIENT_ID }}
+      TF_VAR_arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      TF_VAR_arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}
+      TF_VAR_app_shared_secret: ${{ secrets.APP_SHARED_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      # backend.hcl isn't committed (it holds the tfstate storage account name);
+      # generate it here from a repo/environment variable instead.
+      - name: Write backend config
+        run: |
+          cat > backend.hcl <<EOF
+          resource_group_name  = "rg-tfstate"
+          storage_account_name = "${{ vars.TFSTATE_SA }}"
+          container_name       = "tfstate"
+          key                  = "lockin/dev.terraform.tfstate"
+          EOF
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform Plan
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Read outputs
+        id: tf-outputs
+        run: |
+          echo "resource_group=$(terraform output -raw resource_group)" >> "$GITHUB_OUTPUT"
+          echo "function_app_name=$(terraform output -raw function_app_name)" >> "$GITHUB_OUTPUT"
+          echo "static_web_app_name=$(terraform output -raw static_web_app_name)" >> "$GITHUB_OUTPUT"
+
+  deploy-api:
+    name: Deploy API
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --omit=dev
+        working-directory: api
+
+      - name: Deploy Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ needs.terraform.outputs.function_app_name }}
+          package: api
+
+  deploy-web:
+    name: Deploy Web
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      # Static Web Apps deployment is keyed off a per-resource token, not OIDC,
+      # so pull it from the resource Terraform just created.
+      - name: Get deployment token
+        id: swa-token
+        run: |
+          TOKEN=$(az staticwebapp secrets list \
+            --name ${{ needs.terraform.outputs.static_web_app_name }} \
+            --resource-group ${{ needs.terraform.outputs.resource_group }} \
+            --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: WebApp
+          output_location: ""
+          skip_app_build: true
