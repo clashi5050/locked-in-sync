@@ -1,5 +1,5 @@
 # Workflow name shown in the GitHub Actions UI
-name: 'Add  Static Web App'
+name: 'Add Static Web App'
 
 # Trigger: this workflow only runs when manually triggered from the GitHub Actions UI
 on:
