@@ -69,8 +69,18 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # TEMPORARY: debug logging to diagnose the backend's 403
+      # AuthorizationPermissionMismatch — remove once resolved.
       - name: Terraform Init
-        run: terraform init -backend-config=backend.hcl
+        env:
+          TF_LOG: DEBUG
+        run: |
+          set -o pipefail
+          terraform init -backend-config=backend.hcl 2>&1 | tee tf-init.log
+
+      - name: Show auth debug info on failure
+        if: failure()
+        run: grep -iE "oidc|client.?id|tenant|authoriz|bearer|access.?token|service principal|using the |auth via" tf-init.log || true
 
       - name: Terraform Plan
         run: terraform plan -no-color
