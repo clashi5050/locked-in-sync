@@ -1,0 +1,15 @@
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local backend/var files generated from the *.example templates
+backend.hcl
+terraform.tfvars

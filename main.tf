@@ -1,3 +1,6 @@
+# Provisions the whole Lock In stack: a Table-Storage-backed Function App (the
+# state API) and a Static Web App (the dashboard frontend). See WebApp/DEPLOY.md
+# for the full deploy flow and bootstrap/ for the separate state-backend setup.
 locals {
   suffix    = "${var.app}-${var.environment}-${var.short_loc}"
   rg_name   = "rg-${local.suffix}"
@@ -41,8 +44,8 @@ resource "azurerm_storage_account" "this" {
 
 # The dashboard's entire state lives as a single row in this table.
 resource "azurerm_storage_table" "state" {
-  name                 = "lockinstate"
-  storage_account_name = azurerm_storage_account.this.name
+  name               = "lockinstate"
+  storage_account_id = azurerm_storage_account.this.id
 }
 
 # Consumption plan (Y1): 1M free executions/month, then pay-per-use. Effectively $0 here.

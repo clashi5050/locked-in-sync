@@ -335,6 +335,12 @@
   &quot;decayMode&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Gentle&quot;, &quot;Standard&quot;, &quot;Brutal&quot;], &quot;default&quot;: &quot;Standard&quot;, &quot;tsType&quot;: &quot;string&quot; },
   &quot;graceDays&quot;: { &quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 1, &quot;min&quot;: 0, &quot;max&quot;: 2, &quot;tsType&quot;: &quot;number&quot; }
 }">
+// This is the hand-edited source for the dashboard. `support.js` (loaded
+// above) is the generated dc-runtime that interprets the <x-dc> markup,
+// {{ }} bindings, and sc-if/sc-for directives in this file and renders them
+// via React — don't add markup/logic that assumes anything beyond what that
+// runtime parses. WebApp/index.html is a separate, pre-bundled export of
+// this same app and isn't edited directly; see WebApp/DEPLOY.md.
 class Component extends DCLogic {
   state = {
     data: this.load(),
@@ -363,10 +369,15 @@ class Component extends DCLogic {
   }
 
   // ---------- config (props) ----------
+  // Momentum points lost per idle day, by decayMode prop.
   decay() { return ({ Gentle: 10, Standard: 16, Brutal: 28 })[this.props.decayMode] || 16; }
+  // Days you can miss a check-in before the streak resets (graceDays prop).
   grace() { const g = this.props.graceDays; return (g === 0 || g) ? g : 1; }
   levels() { return ['Cold Start','Booting Up','Operator','Automator','Pipeline Builder','SRE','Tech Lead','Architect','Indispensable']; }
 
+  // Walks total XP down through the level thresholds (150 XP for level 2,
+  // +100 more per level after that) to find the current level and progress
+  // toward the next one.
   levelInfo(xp) {
     const L = this.levels(); let lvl = 1, rem = xp || 0, need = 150;
     while (rem >= need && lvl < L.length) { rem -= need; lvl++; need = 150 + (lvl - 1) * 100; }
@@ -420,6 +431,10 @@ class Component extends DCLogic {
     ];
   }
 
+  // Runs every time the dashboard (re)loads, including right after a cloud
+  // pull. Docks momentum for each day the user was away since lastActiveDate,
+  // migrates pre-plan save data via seedPlan(), and clears any stale
+  // "one thing" so it doesn't carry over from a previous day.
   applyDecay(d) {
     if (!d || !d.certs) d = this.seed();
     if (!d.plan) d.plan = this.seedPlan();
@@ -433,6 +448,9 @@ class Component extends DCLogic {
     return d;
   }
 
+  // Loads from localStorage (or seeds fresh state on first run / parse
+  // failure), applies decay, and writes the result straight back so the
+  // decayed state persists even if the user closes the tab immediately.
   load() {
     let d = null;
     try { d = JSON.parse(localStorage.getItem('lockin_v1')); } catch (e) {}
@@ -453,6 +471,10 @@ class Component extends DCLogic {
   apiUrl(cfg, path) { return cfg.base.replace(/\/+$/, '') + '/api/' + path; }
   setSync(patch) { this.setState(s => ({ sync: Object.assign({}, s.sync, patch) })); }
 
+  // Conflict resolution is last-write-wins on the whole state blob, compared
+  // by updatedAt: if the cloud copy is newer, adopt it locally; otherwise
+  // assume local is ahead and push it up instead. Called on mount and
+  // whenever the user hits "Pull from cloud".
   async maybePull() {
     const cfg = this.syncCfg();
     if (!cfg.base || !cfg.secret) { this.setSync({ status: 'local' }); return; }
@@ -499,6 +521,8 @@ class Component extends DCLogic {
     }
   }
 
+  // Debounces pushNow() so rapid-fire updates (e.g. checking off several
+  // modules in a row) result in one network call instead of one per click.
   schedulePush() {
     const cfg = this.syncCfg();
     if (!cfg.base || !cfg.secret) return;
@@ -547,6 +571,12 @@ class Component extends DCLogic {
     };
   }
 
+  // Central mutation helper: deep-clones state.data, lets fn() mutate the
+  // clone in place, then stamps updatedAt, caps the log at 40 entries,
+  // persists to localStorage, fires a level-up celebration if XP crossed a
+  // threshold, and schedules a debounced cloud push. Every action below
+  // (check-in, logging a win, toggling a module, ...) goes through this so
+  // those side effects only need to be handled once.
   update(fn) {
     const prev = this.state.data;
     const prevLevel = this.levelInfo(prev.totalXp).level;
@@ -603,6 +633,9 @@ class Component extends DCLogic {
     this.setDraft('vis', '');
   };
 
+  // Toggles one cert module; if that was the last module, marks the whole
+  // cert complete and grants a one-time completion bonus (guarded by
+  // cert.complete so re-toggling a module afterward can't re-award it).
   toggleModule(certId, idx) {
     this.update(d => {
       const cert = d.certs.find(c => c.id === certId); if (!cert) return;
@@ -618,6 +651,9 @@ class Component extends DCLogic {
   }
   activateCert(id) { this.update(d => { d.certs.forEach(c => c.active = c.id === id); }); }
 
+  // Same cascade as toggleModule, but for 90-day-plan phases — and unlike
+  // cert completion, the bonus flag resets if a task gets unchecked again,
+  // so re-completing the phase later can re-earn it.
   togglePhaseTask(phaseId, idx) {
     this.update(d => {
       const ph = d.plan.find(p => p.id === phaseId); if (!ph) return;

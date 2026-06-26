@@ -1,9 +1,11 @@
 output "resource_group" {
-  value = azurerm_resource_group.this.name
+  description = "Resource group holding every resource this config creates."
+  value       = azurerm_resource_group.this.name
 }
 
 output "function_app_name" {
-  value = azurerm_linux_function_app.this.name
+  description = "Used by the deploy-api workflow job to target the right Function App."
+  value       = azurerm_linux_function_app.this.name
 }
 
 output "function_base_url" {
@@ -12,7 +14,8 @@ output "function_base_url" {
 }
 
 output "static_web_app_name" {
-  value = azurerm_static_web_app.this.name
+  description = "Used by the deploy-web workflow job to fetch the deployment token."
+  value       = azurerm_static_web_app.this.name
 }
 
 output "static_web_app_url" {

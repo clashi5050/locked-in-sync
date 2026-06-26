@@ -1,3 +1,6 @@
+# End-to-end deploy: provisions/updates Azure infra with Terraform, then ships
+# the Function App (api/) and the static dashboard (WebApp/) on top of it.
+# See WebApp/DEPLOY.md for the one-time setup this workflow assumes.
 name: Deploy Lock In
 
 on:
@@ -9,11 +12,19 @@ permissions:
   id-token: write
   contents: read
 
+# Serialize runs so two pushes never run `terraform apply` against the same
+# state at once. Queue rather than cancel — killing an apply mid-flight can
+# leave infra in a half-applied state.
+concurrency:
+  group: deploy-lockin-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
     environment: dev
+    timeout-minutes: 15
     outputs:
       resource_group: ${{ steps.tf-outputs.outputs.resource_group }}
       function_app_name: ${{ steps.tf-outputs.outputs.function_app_name }}
@@ -70,6 +81,7 @@ jobs:
     needs: terraform
     runs-on: ubuntu-latest
     environment: dev
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -101,6 +113,7 @@ jobs:
     needs: terraform
     runs-on: ubuntu-latest
     environment: dev
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4

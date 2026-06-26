@@ -27,6 +27,6 @@ module.exports = async function (context, req) {
     context.res = { status: 200, headers: { "Content-Type": "application/json" }, body: { ok: true } };
   } catch (e) {
     context.log.error("saveState failed", e);
-    context.res = { status: 500, headers: { "Content-Type": "application/json" }, body: { error: e.message } };
+    context.res = { status: 500, headers: { "Content-Type": "application/json" }, body: { error: "internal error" } };
   }
 };
