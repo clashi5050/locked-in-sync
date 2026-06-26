@@ -6,5 +6,5 @@
   "app": "lockin",
   "app_shared_secret": "REPLACE_WITH_A_LONG_RANDOM_SECRET",
   "SkuTier": "Free",
-  "SkuSize": "F1",
+  "SkuSize": "F1"
 }
